@@ -1,0 +1,32 @@
+
+headers = curl/curl.h
+headerFilter = curl/*
+
+compilerOpts = -I C:\\msys64\\mingw64\\include
+
+
+staticLibraries = libcurl.a
+
+libraryPaths = C:\\msys64\\mingw64\\lib
+linkerOpts = -L C:\\msys64\\mingw64\\lib -lcurl
+
+# 成功
+headers = curl/curl.h
+headerFilter = curl/*
+
+compilerOpts = -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\include
+linkerOpts = -L C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\lib -lcurl
+
+staticLibraries  = libcurl.lib
+libraryPaths  = C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\lib
+
+
+# 静的リンク 実騁E
+headers = curl/curl.h
+headerFilter = curl/*
+
+compilerOpts = -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\include
+
+staticLibraries  = curl_x64-windows\\lib\\libcurl.lib zlib_x64-windows\\lib\\zlib.lib
+libraryPaths  = C:\\Users\\fuminori.hakoishi\\vcpkg\\packages
+linkerOpts =  -lcurl -lz
