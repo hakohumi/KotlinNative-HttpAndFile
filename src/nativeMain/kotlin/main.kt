@@ -35,8 +35,6 @@ fun main(args: Array<String>) {
     println(curlTest.getHeader())
 
     curlTest.close()
-//    println("body : $bodyBuffer")
-//    println("header : $headerBuffer")
 
 }
 
@@ -47,14 +45,21 @@ class CUrl(url: String) {
     val header = Event<String>()
     val body = Event<String>()
 
-
     private var bodyDataList = ArrayList<String>()
     private var headerDataList = ArrayList<String>()
 
-
     init {
         curl_easy_setopt(curl, CURLOPT_URL, url)
-        val header = staticCFunction(::headerCallback)
+        val header =
+            staticCFunction { buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer? ->
+                if (buffer == null) return@staticCFunction 0u
+                if (userdata != null) {
+                    val data = buffer.toKString((size * nitems).toInt()).trim()
+                    val curl = userdata.asStableRef<CUrl>().get()
+                    curl.header(data)
+                }
+                return@staticCFunction size * nitems
+            }
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header)
         curl_easy_setopt(curl, CURLOPT_HEADERDATA, stableRef.asCPointer())
         val writeData =
@@ -66,7 +71,6 @@ class CUrl(url: String) {
                     val data = buffer.toKString((size * nitems).toInt()).trim()
                     val curl = userdata.asStableRef<CUrl>().get()
                     curl.body(data)
-//                    bodyBuffer = data
                 }
                 return@staticCFunction size * nitems
             }
@@ -110,27 +114,6 @@ class CUrl(url: String) {
 fun CPointer<ByteVar>.toKString(length: Int): String {
     val bytes = this.readBytes(length)
     return bytes.decodeToString()
-}
-
-fun headerCallback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
-    if (buffer == null) return 0u
-    if (userdata != null) {
-        val data = buffer.toKString((size * nitems).toInt()).trim()
-        val curl = userdata.asStableRef<CUrl>().get()
-        curl.header(data)
-    }
-    return size * nitems
-}
-
-
-fun writeCallback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
-    if (buffer == null) return 0u
-    if (userdata != null) {
-        val data = buffer.toKString((size * nitems).toInt()).trim()
-        val curl = userdata.asStableRef<CUrl>().get()
-        curl.body(data)
-    }
-    return size * nitems
 }
 
 typealias EventHandler<T> = (T) -> Unit
