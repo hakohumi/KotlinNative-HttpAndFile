@@ -1,59 +1,97 @@
-import libcurl.*
 import kotlinx.cinterop.*
-import platform.posix.*
-import kotlin.io.*
-import kotlin.native.*
+import libcurl.*
+import platform.posix.size_t
+
 
 fun main(args: Array<String>) {
-    var url: String = ""
-    if (args.size == 0){
+    var url = ""
+    if (args.isEmpty()) {
         println("Please provide a URL")
-        val read = readLine()
+        var read = readLine()
+        read = "example.com" as String?
 
-        read?.let{url = it.toString()}
-    }else{
+        read?.let { url = it }
+    } else {
         url = args[0]
     }
 
-    val curl = curl_easy_init()
-    if (curl != null) {
-        curl_easy_setopt(curl, CURLOPT_URL, url)
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)
-        val res = curl_easy_perform(curl)
-        if (res != CURLE_OK) {
-            println("curl_easy_perform() failed " + curl_easy_strerror(res)?.toKString())
-        }
-        curl_easy_cleanup(curl)
-    }
+//    val curl = curl_easy_init()
+//    if (curl != null) {
+//        curl_easy_setopt(curl, CURLOPT_URL, url)
+//        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)
+////        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+//        val res = curl_easy_perform(curl)
+//        if (res != CURLE_OK) {
+//            println("curl_easy_perform() failed " + curl_easy_strerror(res)?.toKString())
+//        }
+//        curl_easy_cleanup(curl)
+//    }
 
     println()
-    val curl_test = CUrl(url)
-    curl_test.fetch()
-    curl_test.close()
+    val curlTest = CUrl(url)
+    curlTest.fetch()
+
+    println(curlTest.getBody())
+    println(curlTest.getHeader())
+
+    curlTest.close()
+//    println("body : $bodyBuffer")
+//    println("header : $headerBuffer")
 
 }
 
-
-
-class CUrl(url: String)  {
+class CUrl(url: String) {
     private val stableRef = StableRef.create(this)
 
     private val curl = curl_easy_init()
-
-    init {
-        curl_easy_setopt(curl, CURLOPT_URL, url)
-        val header = staticCFunction(::header_callback)
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header)
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, stableRef.asCPointer())
-        val writeData = staticCFunction(::write_callback)
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData)
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, stableRef.asCPointer())
-    }
-
     val header = Event<String>()
     val body = Event<String>()
 
-    fun nobody(){
+
+    private var bodyDataList = ArrayList<String>()
+    private var headerDataList = ArrayList<String>()
+
+
+    init {
+        curl_easy_setopt(curl, CURLOPT_URL, url)
+        val header = staticCFunction(::headerCallback)
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header)
+        curl_easy_setopt(curl, CURLOPT_HEADERDATA, stableRef.asCPointer())
+        val writeData =
+            staticCFunction { buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer? ->
+                if (buffer == null) {
+                    return@staticCFunction 0u
+                }
+                if (userdata != null) {
+                    val data = buffer.toKString((size * nitems).toInt()).trim()
+                    val curl = userdata.asStableRef<CUrl>().get()
+                    curl.body(data)
+//                    bodyBuffer = data
+                }
+                return@staticCFunction size * nitems
+            }
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData)
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, stableRef.asCPointer())
+
+
+        this.header += ::getHeaderHandler
+        this.body += ::getBodyHandler
+
+    }
+
+
+    fun <T> getBodyHandler(data: T) {
+        bodyDataList.add(data.toString())
+    }
+
+    fun <T> getHeaderHandler(data: T) {
+        headerDataList.add(data.toString())
+    }
+
+    fun getBody() = bodyDataList
+    fun getHeader() = headerDataList
+
+    fun nobody() {
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1L)
     }
 
@@ -74,29 +112,29 @@ fun CPointer<ByteVar>.toKString(length: Int): String {
     return bytes.decodeToString()
 }
 
-fun header_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
+fun headerCallback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
     if (buffer == null) return 0u
     if (userdata != null) {
-        val header = buffer.toKString((size * nitems).toInt()).trim()
+        val data = buffer.toKString((size * nitems).toInt()).trim()
         val curl = userdata.asStableRef<CUrl>().get()
-        curl.header(header)
+        curl.header(data)
     }
     return size * nitems
 }
 
 
-fun write_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
+fun writeCallback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
     if (buffer == null) return 0u
     if (userdata != null) {
         val data = buffer.toKString((size * nitems).toInt()).trim()
         val curl = userdata.asStableRef<CUrl>().get()
         curl.body(data)
-        println(data)
     }
     return size * nitems
 }
 
 typealias EventHandler<T> = (T) -> Unit
+
 class Event<T : Any> {
     private var handlers = emptyList<EventHandler<T>>()
 

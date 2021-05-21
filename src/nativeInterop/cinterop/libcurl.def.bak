@@ -21,7 +21,7 @@ staticLibraries  = libcurl.lib
 libraryPaths  = C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\lib
 
 
-# 静的リンク 実騁E
+# 静的リンク 実験
 headers = curl/curl.h
 headerFilter = curl/*
 

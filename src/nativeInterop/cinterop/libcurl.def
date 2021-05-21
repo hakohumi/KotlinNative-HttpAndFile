@@ -1,8 +1,15 @@
 headers = curl/curl.h
 headerFilter = curl/*
 
-compilerOpts = -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\include -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\zlib_x64-windows\\include
-
-staticLibraries  = \\curl_x64-windows\\lib\\libcurl.lib \\zlib_x64-windows\\lib\\zlib.lib
-linkerOpts =  -L C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\bin -lcurl
 libraryPaths  = C:\\Users\\fuminori.hakoishi\\vcpkg\\packages
+staticLibraries  = \\curl_x64-windows\\lib\\libcurl.lib \\zlib_x64-windows\\lib\\zlib.lib
+
+compilerOpts = -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\include -I C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\zlib_x64-windows\\include  -lcurl
+
+linkerOpts =  -L C:\\Users\\fuminori.hakoishi\\vcpkg\\packages\\curl_x64-windows\\bin
+
+
+# 静的リンク実験
+#staticLibraries  = libcurl.a
+#libraryPaths  = C:\\msys64\\mingw64\\lib
+#libraryPaths  = src/nativeinterop/cinterop

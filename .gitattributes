@@ -1,0 +1,8 @@
+*           text=auto
+*.txt       text
+*.vcproj    text eol=crlf
+*.sh        text eol=lf
+*.jpg       -text
+*.def       text eol=lf
+*.def.bak   text eol=lf
+*.kt        text eol=lf
