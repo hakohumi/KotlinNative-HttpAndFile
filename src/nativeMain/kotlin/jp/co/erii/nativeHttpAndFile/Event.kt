@@ -1,6 +1,6 @@
 package jp.co.erii.nativeHttpAndFile
 
-typealias EventHandler<T> = (T) -> Unit
+typealias EventHandler<T> = (T, Int) -> Unit
 
 class Event<T : Any> {
     private var handlers = emptyList<EventHandler<T>>()
@@ -14,11 +14,15 @@ class Event<T : Any> {
         handlers = handlers - handler
     }
 
+    fun unsubscribe(hash: Int) {
+        handlers = handlers.filter { it.hashCode() != hash }
+    }
+
     fun invoke(value: T) {
         var exception: Throwable? = null
         for (handler in handlers) {
             try {
-                handler(value)
+                handler(value, handler.hashCode())
             } catch (e: Throwable) {
                 exception = e
             }
