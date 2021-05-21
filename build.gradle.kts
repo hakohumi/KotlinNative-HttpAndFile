@@ -25,7 +25,7 @@ kotlin {
         val libcurl by main.cinterops.creating
         binaries {
             executable {
-                entryPoint = "main"
+                entryPoint = "jp.co.erii.nativeHttpAndFile.main"
             }
         }
     }

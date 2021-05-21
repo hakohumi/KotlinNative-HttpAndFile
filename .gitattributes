@@ -6,3 +6,4 @@
 *.def       text eol=lf
 *.def.bak   text eol=lf
 *.kt        text eol=lf
+*.kts       text eol=lf
