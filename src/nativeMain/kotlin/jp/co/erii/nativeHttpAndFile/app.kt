@@ -13,6 +13,25 @@ fun main(args: Array<String>) {
         url = args[0]
     }
 
+
+//
+//    val client = HttpClient(Curl) {
+//        engine {
+//            // this: CurlClientEngineConfig
+//            sslVerify = true
+//        }
+//    }
+
+//    val client = HttpClient()
+
+//    runBlocking {
+//        val deferred = GlobalScope.async {
+//            val response: HttpResponse = client.get("https://ktor.io/")
+//            response
+//        }
+//    }
+
+
     println()
 
     val curlTest = CUrl(url)
@@ -30,8 +49,10 @@ fun main(args: Array<String>) {
     curlTest.close()
 
     println("\nファイル読み込み")
-    val readText = readAllText("./text.txt")
-    println("read value = $readText")
+    val readFilePath = "./text.txt"
+    val readText = readAllText(readFilePath)
+    println("　ファイルパス = $readFilePath")
+    println("　読み込んだ内容 = $readText")
 
     println("ファイル書き込み前")
     val writeFilePath = "./written_text.txt"

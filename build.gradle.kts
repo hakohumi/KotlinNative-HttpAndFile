@@ -7,6 +7,8 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
+    google()
 }
 
 kotlin {
@@ -30,7 +32,22 @@ kotlin {
         }
     }
     sourceSets {
-        val nativeMain by getting
-        val nativeTest by getting
+        val nativeMain by getting {
+            dependencies {
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
+//                implementation("org.jetbrains.kotlinx:kotlinx-io-common:0.1.3")
+//                implementation("org.jetbrains.kotlinx:kotlinx-io-native:0.1.16")
+//                implementation("io.ktor:ktor-client-core:1.5.4")
+                // https://ktor.io/docs/http-client-engines.html#desktop
+//                implementation("io.ktor:ktor-client-curl:1.5.4")
+            }
+        }
+        val nativeTest by getting {
+            dependencies {
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+//                implementation("org.jetbrains.kotlinx:kotlinx-io-common:0.1.3")
+//                implementation("org.jetbrains.kotlinx:kotlinx-io-native:0.1.3")
+            }
+        }
     }
 }
