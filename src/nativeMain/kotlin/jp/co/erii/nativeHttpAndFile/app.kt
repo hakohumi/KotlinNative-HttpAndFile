@@ -14,30 +14,35 @@ fun main(args: Array<String>) {
     }
 
     println()
+
     val curlTest = CUrl(url)
 
     curlTest.headerEvent.subscribe { it, hash ->
         println("header = $it")
-    }
-
-    val bodyHandler = curlTest.bodyEvent.subscribe { it, hash ->
-        println("body = ${it.length}")
-        curlTest.bodyEvent.unsubscribe(hash)
+        curlTest.headerEvent.unsubscribe(hash)
     }
 
     curlTest.bodyEvent.subscribe { it, hash ->
-        println("body = ${it.length}")
+        println("body = ${it}")
+        curlTest.bodyEvent.unsubscribe(hash)
     }
-
-    curlTest.bodyEvent.subscribe { a, b ->
-        println("body = ${a.length}")
-    }
-
     curlTest.fetch()
-
-    curlTest.bodyEvent.unsubscribe(bodyHandler)
     curlTest.close()
 
-//    val text = readAllText("./text.txt")
+    println("\nファイル読み込み")
+    val readText = readAllText("./text.txt")
+    println("read value = $readText")
+
+    println("ファイル書き込み前")
+    val writeFilePath = "./written_text.txt"
+    val writeText = "Write text"
+    println("　ファイル名 = $writeFilePath")
+    println("　ファイルに書き込む内容 = $writeText")
+
+    writeAllText(writeFilePath, writeText)
+
+    println("\nファイル書き込み 確認")
+    println("　書き込まれている内容 = ${readAllText(writeFilePath)}")
+
 
 }

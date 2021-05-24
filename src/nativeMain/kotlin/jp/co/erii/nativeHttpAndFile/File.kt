@@ -1,15 +1,17 @@
+// 参考ページ : https://www.nequalsonelifestyle.com/2020/11/16/kotlin-native-file-io/
+
 package jp.co.erii.nativeHttpAndFile
 
 import kotlinx.cinterop.*
-import platform.posix.FILE
-import platform.posix.fclose
-import platform.posix.fgets
-import platform.posix.fopen
+import platform.posix.*
+
+const val READ_MODE = "r"
+const val WRITE_MODE = "w"
 
 fun readAllText(filePath: String): String? {
     val returnBuffer = StringBuilder()
 //    val file = fopen(filePath, "r") ?: throw IllegalArgumentException("Cannot open input file $filePath")
-    val file = fopen(filePath, "r")
+    val file = fopen(filePath, READ_MODE)
     if (file !is CPointer<FILE>) {
         println("Cannot open input file $filePath")
         return null
@@ -30,4 +32,30 @@ fun readAllText(filePath: String): String? {
     }
 
     return returnBuffer.toString()
+}
+
+fun writeAllText(filePath: String, text: String) {
+    val file = fopen(filePath, WRITE_MODE) ?: throw IllegalArgumentException("Cannot open output file $filePath")
+    try {
+        memScoped {
+            if (fputs(text, file) == EOF) throw Error("File write error")
+        }
+    } finally {
+        fclose(file)
+    }
+}
+
+fun writeAllLines(filePath: String, lines: List<String>, lineEnding: String = "\n") {
+    val file = fopen(filePath, WRITE_MODE) ?: throw IllegalArgumentException("Cannot open output file $filePath")
+    try {
+        memScoped {
+            lines.forEach {
+                if (fputs(it + lineEnding, file) == EOF) {
+                    throw Error("File write error")
+                }
+            }
+        }
+    } finally {
+        fclose(file)
+    }
 }
