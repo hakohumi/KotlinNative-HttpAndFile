@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.5.0"
+    kotlin("plugin.serialization") version "1.5.0"
 }
 
 group = "me.user"
@@ -40,6 +41,7 @@ kotlin {
 //                implementation("io.ktor:ktor-client-core:1.5.4")
                 // https://ktor.io/docs/http-client-engines.html#desktop
 //                implementation("io.ktor:ktor-client-curl:1.5.4")
+//                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
             }
         }
         val nativeTest by getting {

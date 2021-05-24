@@ -1,6 +1,5 @@
 package jp.co.erii.nativeHttpAndFile
 
-
 fun main(args: Array<String>) {
     var url = ""
     if (args.isEmpty()) {
@@ -41,7 +40,9 @@ fun main(args: Array<String>) {
         curlTest.headerEvent.unsubscribe(hash)
     }
 
+    var bodyValue = ""
     curlTest.bodyEvent.subscribe { it, hash ->
+        bodyValue = it
         println("body = ${it}")
         curlTest.bodyEvent.unsubscribe(hash)
     }
@@ -56,7 +57,7 @@ fun main(args: Array<String>) {
 
     println("ファイル書き込み前")
     val writeFilePath = "./written_text.txt"
-    val writeText = "Write text"
+    val writeText = bodyValue
     println("　ファイル名 = $writeFilePath")
     println("　ファイルに書き込む内容 = $writeText")
 
